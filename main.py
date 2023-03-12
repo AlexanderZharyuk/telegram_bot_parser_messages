@@ -86,7 +86,10 @@ async def main():
         if not validated_new_messages:
             continue
 
-        old_messages = loads(project_settings.redis.get("old_messages"))
+        try:
+            old_messages = loads(project_settings.redis.get("old_messages"))
+        except TypeError:
+            old_messages = []
 
         if not old_messages:
             project_settings.redis.set(
