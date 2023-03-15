@@ -49,14 +49,30 @@ async def filter_new_messages(
             "\n"
         ) + price_string_start_index
 
+        date_string_start_index = message_text.find("Дата:") + 6
+        date_string_end_index = message_text[date_string_start_index:].find(
+            "\n"
+        ) + date_string_start_index
+
         price = message_text[price_string_start_index:price_string_end_index]
+        date = message_text[date_string_start_index:date_string_end_index]
+
+        try:
+            reformatted_datetime = datetime.strptime(
+                date.strip(),
+                "%d.%m.%Y"
+            ).date()
+        except ValueError:
+            logger.error("Can't convert date to datetime")
+            continue
+
         try:
             trip_price = int(price.strip())
         except ValueError:
             logger.error("Can't convert price to int")
             continue
 
-        if trip_price >= minimal_price:
+        if trip_price >= minimal_price and reformatted_datetime >= datetime.now().date():
             validate_messages.append(message_info)
 
     validate_messages = [
